@@ -65,6 +65,11 @@ return [
                 'local',
             ],
         ],
+
+        /*
+         * Encrypt the final zip file using defuse php-encryption
+         */
+        'encrypt' => false,
     ],
 
     /*

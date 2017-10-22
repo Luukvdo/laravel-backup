@@ -29,6 +29,9 @@ class BackupJob
     /** @var string */
     protected $filename;
 
+    /** @var bool */
+    protected $encrypt;
+
     /** @var \Spatie\TemporaryDirectory\TemporaryDirectory */
     protected $temporaryDirectory;
 
@@ -93,6 +96,13 @@ class BackupJob
         return $this;
     }
 
+    public function setEncryption(bool $encrypt): BackupJob
+    {
+        $this->encrypt = $encrypt;
+
+        return $this;
+    }
+
     public function onlyBackupTo(string $diskName): BackupJob
     {
         $this->backupDestinations = $this->backupDestinations->filter(function (BackupDestination $backupDestination) use ($diskName) {
@@ -133,6 +143,10 @@ class BackupJob
             }
 
             $zipFile = $this->createZipContainingEveryFileInManifest($manifest);
+
+            if ($this->encrypt) {
+                $zipFile = Encrypt::encryptFile($zipFile);
+            }
 
             $this->copyToBackupDestinations($zipFile);
         } catch (Exception $exception) {

@@ -5,6 +5,7 @@ namespace Spatie\Backup\Test\Integration;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Backup\Events\BackupHasFailed;
+use ZipArchive;
 
 class BackupCommandTest extends TestCase
 {
@@ -281,5 +282,33 @@ class BackupCommandTest extends TestCase
             '--only-db' => true,
             '--disable-notifications' => true,
         ]);
+    }
+
+    /** @test */
+    public function it_will_not_encrypt_when_configured_not_to()
+    {
+        $this->app['config']->set('backup.backup.encrypt', false);
+
+        Artisan::call('backup:run', ['--only-files' => true]);
+
+        $this->assertFileExistsOnDisk($this->expectedZipPath, 'local');
+        $this->assertTrue((new ZipArchive)->open(
+            $this->app['config']->get('filesystems.disks.local.root').DIRECTORY_SEPARATOR.$this->expectedZipPath
+        ));
+    }
+
+    /** @test */
+    public function it_will_encrypt_when_configured_to()
+    {
+        $this->app['config']->set('backup.backup.encrypt', true);
+
+        Artisan::call('backup:run', ['--only-files' => true]);
+
+        $this->assertFileExistsOnDisk($this->expectedZipPath, 'local');
+
+        // An encrypted ZIP file cannot be opened by ZipArchive and should give an error
+        $this->assertEquals(ZipArchive::ER_NOZIP, (new ZipArchive)->open(
+            $this->app['config']->get('filesystems.disks.local.root').DIRECTORY_SEPARATOR.$this->expectedZipPath
+        ));
     }
 }

@@ -7,6 +7,8 @@ use Spatie\Backup\Commands\ListCommand;
 use Spatie\Backup\Helpers\ConsoleOutput;
 use Spatie\Backup\Commands\BackupCommand;
 use Spatie\Backup\Commands\CleanupCommand;
+use Spatie\Backup\Commands\DecryptCommand;
+use Spatie\Backup\Commands\EncryptCommand;
 use Spatie\Backup\Commands\MonitorCommand;
 use Spatie\Backup\Notifications\EventHandler;
 
@@ -39,12 +41,16 @@ class BackupServiceProvider extends ServiceProvider
 
         $this->app->bind('command.backup:run', BackupCommand::class);
         $this->app->bind('command.backup:clean', CleanupCommand::class);
+        $this->app->bind('command.backup:decrypt', DecryptCommand::class);
+        $this->app->bind('command.backup:encrypt', EncryptCommand::class);
         $this->app->bind('command.backup:list', ListCommand::class);
         $this->app->bind('command.backup:monitor', MonitorCommand::class);
 
         $this->commands([
             'command.backup:run',
             'command.backup:clean',
+            'command.backup:decrypt',
+            'command.backup:encrypt',
             'command.backup:list',
             'command.backup:monitor',
         ]);
